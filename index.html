@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Our Oahu Trip Planner 🌺</title>
+<style>
+:root{
+  --ink:#12312e; --deep:#0b3d3a; --teal:#0f7a6c; --teal-soft:#e3f2ee;
+  --coral:#ff6f5e; --coral-soft:#ffe9e5; --sun:#f2b230; --sand:#fbf5ea;
+  --line:#e6ded0; --muted:#6b7f7c; --radius:18px;
+  --shadow:0 10px 30px rgba(10,50,45,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:var(--ink); background:linear-gradient(180deg,#fbf5ea,#f5ecdf 55%,#efe6d6);
+  background-attachment:fixed; -webkit-font-smoothing:antialiased; line-height:1.5;
+}
+.wrap{max-width:1060px;margin:0 auto;padding:0 18px}
+h1,h2,h3{margin:0;letter-spacing:-.02em}
+
+/* HERO */
+.hero{
+  background:
+    radial-gradient(900px 420px at 10% -20%, rgba(255,111,94,.38), transparent 62%),
+    radial-gradient(760px 400px at 92% -10%, rgba(242,178,48,.30), transparent 60%),
+    linear-gradient(160deg,#0a3533,#0f7a6c 68%,#12897a);
+  color:#fff; padding:40px 0 30px; border-radius:0 0 30px 30px;
+  box-shadow:0 14px 40px rgba(11,61,58,.22);
+}
+.eyebrow{font-size:11.5px;text-transform:uppercase;letter-spacing:2.4px;opacity:.85;margin:0 0 10px;font-weight:700}
+.hero h1{font-size:clamp(28px,5vw,44px);line-height:1.08;font-weight:800}
+.hero .sub{margin:12px 0 0;max-width:56ch;font-size:15px;opacity:.9;line-height:1.6}
+.hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-top:24px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field span{font-size:10.5px;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;opacity:.78}
+.field input{
+  width:100%;padding:10px 13px;border-radius:12px;border:1px solid rgba(255,255,255,.34);
+  background:rgba(255,255,255,.14);color:#fff;font-size:14px;font-family:inherit;
+  backdrop-filter:blur(6px);transition:.16s;
+}
+.field input::placeholder{color:rgba(255,255,255,.55)}
+.field input:focus{outline:none;border-color:#fff;background:rgba(255,255,255,.24)}
+.field input[type=date]{color-scheme:dark}
+.hero-status{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px}
+.countdown{
+  display:inline-block;padding:8px 16px;border-radius:999px;
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.22);
+  font-size:13.5px;font-weight:600;
+}
+.sync-pill{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;
+  font-size:12.5px;font-weight:700;border:1px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.12);cursor:pointer;transition:.16s;white-space:nowrap;
+}
+.sync-pill:hover{background:rgba(255,255,255,.24)}
+.sync-pill.live{background:rgba(120,255,200,.18);border-color:rgba(120,255,200,.5)}
+.sync-pill.saving{background:rgba(255,220,120,.2);border-color:rgba(255,220,120,.5)}
+.sync-pill.local{background:rgba(255,255,255,.12)}
+.sync-pill.error{background:rgba(255,120,120,.25);border-color:rgba(255,120,120,.6)}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.btn{
+  padding:9px 16px;border-radius:999px;font-size:13px;font-weight:700;
+  border:1px solid rgba(255,255,255,.42);background:rgba(255,255,255,.12);
+  color:#fff;cursor:pointer;font-family:inherit;transition:.16s;
+}
+.btn:hover{background:rgba(255,255,255,.24);transform:translateY(-1px)}
+.btn.primary{background:#fff;color:var(--deep);border-color:#fff}
+.btn.primary:hover{background:#ffe9c9}
+
+/* NAV */
+.nav{
+  position:sticky;top:0;z-index:40;background:rgba(251,245,234,.88);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line);margin-top:-2px;
+}
+.nav .wrap{display:flex;align-items:center;gap:4px;overflow-x:auto;padding:10px 18px;scrollbar-width:none}
+.nav .wrap::-webkit-scrollbar{display:none}
+.tab{
+  border:0;background:transparent;padding:9px 15px;border-radius:999px;
+  font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;
+  white-space:nowrap;font-family:inherit;transition:.16s;
+}
+.tab:hover{background:#efe6d6;color:var(--ink)}
+.tab.active{background:var(--deep);color:#fff}
+.pct{margin-left:auto;font-size:12.5px;font-weight:800;color:var(--teal);white-space:nowrap;padding-left:10px}
+.progress{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(15,122,108,.12)}
+.progress .bar{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--sun));transition:width .35s ease;border-radius:0 3px 3px 0}
+
+/* PANELS */
+.panel{display:none;padding:26px 0 70px;animation:fade .28s ease}
+.panel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.section-title{font-size:13px;text-transform:uppercase;letter-spacing:2px;font-weight:800;color:var(--teal);margin:0 0 4px}
+.section-sub{font-size:14px;color:var(--muted);margin:0 0 18px}
+.hint{
+  background:var(--teal-soft);border:1px solid #cfe8e2;color:#0b5e54;
+  padding:11px 16px;border-radius:14px;font-size:13.5px;margin:0 0 20px;
+}
+.hint strong{font-weight:800}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px}
+.stack{display:flex;flex-direction:column;gap:16px}
+
+/* DAYS */
+.day-head{display:flex;align-items:center;gap:13px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.day-badge{
+  background:var(--deep);color:#fff;font-size:11px;font-weight:800;
+  letter-spacing:1.4px;text-transform:uppercase;padding:6px 13px;border-radius:999px;white-space:nowrap;
+}
+.day-title{font-size:18px;font-weight:800}
+.day-place{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.4px}
+.items{list-style:none;margin:0;padding:0}
+.item{display:flex;align-items:flex-start;gap:13px;padding:13px 2px;border-bottom:1px dashed var(--line)}
+.item:last-child{border-bottom:0;padding-bottom:2px}
+.item input[type=checkbox]{
+  appearance:none;-webkit-appearance:none;width:22px;height:22px;flex:0 0 auto;margin-top:2px;
+  border:2px solid #d9d0c0;border-radius:7px;background:#fff;cursor:pointer;position:relative;transition:.16s;
+}
+.item input[type=checkbox]:hover{border-color:var(--teal)}
+.item input[type=checkbox]:checked{background:var(--teal);border-color:var(--teal)}
+.item input[type=checkbox]:checked::after{
+  content:'';position:absolute;left:6px;top:2px;width:5px;height:10px;
+  border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg);
+}
+.item-body{flex:1;min-width:0}
+.chip{
+  display:inline-block;background:var(--teal-soft);color:#0b5e54;
+  font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  padding:3px 9px;border-radius:999px;margin-bottom:5px;
+}
+.item-body p{margin:0;font-size:14.5px;line-height:1.55}
+.item.done .item-body p{text-decoration:line-through;opacity:.45}
+.who{
+  width:34px;height:34px;flex:0 0 auto;border-radius:50%;
+  border:2px dashed #d5cbba;background:#fff;color:#b0a591;
+  font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;
+  display:grid;place-items:center;transition:.16s;line-height:1;
+}
+.who:hover{transform:scale(1.08)}
+.who.a{border:2px solid var(--coral);background:var(--coral-soft);color:#c2410c}
+.who.b{border:2px solid var(--teal);background:var(--teal-soft);color:#0b5e54}
+.who.both{border:2px solid var(--sun);background:#fff4dc;color:#8a6100}
+
+/* STAYS */
+.stays{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;margin-bottom:26px}
+.stay{position:relative;transition:.18s}
+.stay:hover{transform:translateY(-2px)}
+.stay.selected{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-soft),var(--shadow)}
+.stay .area{font-size:10.5px;text-transform:uppercase;letter-spacing:1.4px;font-weight:800;color:var(--teal)}
+.stay h3{font-size:17.5px;margin:6px 0 8px}
+.stay p{font-size:14px;line-height:1.6;color:#3d5553;margin:0}
+.stay ul{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.stay li{font-size:13.5px;color:#3d5553;padding-left:20px;position:relative}
+.stay li::before{content:'✓';position:absolute;left:0;color:var(--teal);font-weight:800}
+.stay-actions{display:flex;align-items:center;gap:10px;margin-top:15px;flex-wrap:wrap}
+.pick{
+  border:1.5px solid var(--line);background:#fff;color:var(--ink);
+  padding:8px 15px;border-radius:999px;font-weight:800;font-size:13px;
+  cursor:pointer;font-family:inherit;transition:.16s;
+}
+.pick:hover{border-color:var(--teal);color:var(--teal)}
+.stay.selected .pick{background:var(--teal);border-color:var(--teal);color:#fff}
+.booked{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
+.booked input{accent-color:var(--teal);width:17px;height:17px;cursor:pointer}
+
+/* LISTS */
+.group{margin-bottom:16px}
+.group-head{
+  font-size:12px;text-transform:uppercase;letter-spacing:1.6px;font-weight:800;
+  color:var(--deep);margin:0 0 10px;display:flex;align-items:center;gap:9px;
+}
+.group-head::after{content:'';flex:1;height:1px;background:var(--line)}
+.mini{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 6px;border-radius:8px;font-family:inherit}
+.mini:hover{background:var(--coral-soft);color:#c2410c}
+.add-row{display:flex;gap:9px;margin-top:6px}
+.add-row input{flex:1;padding:11px 15px;border-radius:12px;border:1.5px solid var(--line);font-size:14px;font-family:inherit;background:#fff;color:var(--ink)}
+.add-row input:focus{outline:none;border-color:var(--teal)}
+.add-row button{padding:11px 20px;border-radius:12px;border:0;background:var(--deep);color:#fff;font-weight:800;font-size:13.5px;cursor:pointer;font-family:inherit;transition:.16s}
+.add-row button:hover{background:var(--teal)}
+
+/* NOTES */
+.note-form{display:flex;flex-direction:column;gap:11px}
+.note-form textarea{
+  width:100%;min-height:92px;padding:13px 15px;border-radius:14px;
+  border:1.5px solid var(--line);font-family:inherit;font-size:14.5px;
+  resize:vertical;color:var(--ink);background:#fff;
+}
+.note-form textarea:focus{outline:none;border-color:var(--teal)}
+.note-form .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select{padding:10px 14px;border-radius:12px;border:1.5px solid var(--line);font-family:inherit;font-size:13.5px;font-weight:700;background:#fff;color:var(--ink);cursor:pointer}
+select:focus{outline:none;border-color:var(--teal)}
+.note{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px 17px;box-shadow:var(--shadow)}
+.note-head{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.avatar{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;flex:0 0 auto}
+.avatar.a{background:var(--coral)}
+.avatar.b{background:var(--teal)}
+.note-head b{font-size:13.5px}
+.note-head time{font-size:11.5px;color:var(--muted);margin-left:auto;font-weight:600}
+.note p{margin:0;font-size:14.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+
+/* INFO */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.info h3{font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.info ul{margin:0;padding-left:19px;display:flex;flex-direction:column;gap:8px}
+.info li{font-size:14px;line-height:1.6;color:#3d5553}
+.info .warn{background:var(--coral-soft);border-left:4px solid var(--coral);padding:11px 14px;border-radius:0 12px 12px 0;margin-top:12px;font-size:13.5px;color:#8a3325;font-weight:600}
+.info code{background:#f2ece0;padding:2px 6px;border-radius:6px;font-size:12.5px;word-break:break-all}
+
+/* MODAL */
+.modal{
+  position:fixed;inset:0;z-index:200;background:rgba(11,61,58,.55);
+  backdrop-filter:blur(6px);display:grid;place-items:center;padding:18px;
+  animation:fade .2s ease;
+}
+.modal[hidden]{display:none}
+.modal-box{
+  background:#fff;border-radius:22px;padding:26px 26px 22px;max-width:520px;width:100%;
+  max-height:90vh;overflow-y:auto;box-shadow:0 30px 70px rgba(11,61,58,.35);
+}
+.modal-box h2{font-size:22px;margin-bottom:8px}
+.modal-box > p{font-size:14px;color:var(--muted);margin:0 0 18px;line-height:1.6}
+.modal-box label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1.4px;font-weight:800;color:var(--deep);margin:16px 0 7px}
+.modal-box textarea{
+  width:100%;min-height:120px;padding:12px 14px;border-radius:13px;
+  border:1.5px solid var(--line);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:12.5px;line-height:1.5;resize:vertical;color:var(--ink);
+}
+.modal-box textarea:focus{outline:none;border-color:var(--teal)}
+.modal-box input[type=text]{
+  width:100%;padding:11px 14px;border-radius:13px;border:1.5px solid var(--line);
+  font-size:14px;font-family:inherit;color:var(--ink);
+}
+.modal-box input[type=text]:focus{outline:none;border-color:var(--teal)}
+.modal-row{display:flex;gap:9px}
+.modal-row input{flex:1}
+.modal-row button{
+  padding:11px 16px;border-radius:13px;border:1.5px solid var(--line);background:#fff;
+  font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;color:var(--ink);white-space:nowrap;
+}
+.modal-row button:hover{border-color:var(--teal);color:var(--teal)}
+.modal-actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+.modal-actions button{
+  flex:1;min-width:140px;padding:13px 20px;border-radius:14px;font-weight:800;
+  font-size:14px;cursor:pointer;font-family:inherit;transition:.16s;border:1.5px solid var(--line);
+  background:#fff;color:var(--ink);
+}
+.modal-actions button:hover{border-color:var(--teal)}
+.modal-actions button.primary{background:var(--deep);color:#fff;border-color:var(--deep)}
+.modal-actions button.primary:hover{background:var(--teal);border-color:var(--teal)}
+.modal-actions button:disabled{opacity:.5;cursor:not-allowed}
+.tiny{font-size:11.5px;color:var(--muted);margin-top:16px;line-height:1.6}
+.status-msg{font-size:13px;font-weight:700;margin-top:12px;min-height:18px}
+.status-msg.ok{color:var(--teal)}
+.status-msg.err{color:#c2410c}
+
+#toast{
+  position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);
+  background:var(--deep);color:#fff;padding:12px 22px;border-radius:999px;
+  font-size:13.5px;font-weight:700;opacity:0;pointer-events:none;
+  transition:.28s;z-index:300;box-shadow:0 12px 30px rgba(11,61,58,.35);
+  max-width:90vw;text-align:center;
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+footer{text-align:center;padding:30px 18px 50px;color:var(--muted);font-size:13px}
+
+@media(max-width:520px){
+  .hero{padding:32px 0 24px;border-radius:0 0 22px 22px}
+  .card{padding:16px}
+  .pct{display:none}
+  .day-head{flex-wrap:wrap}
+  .modal-box{padding:22px 18px}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">🌺 First-Timer Oahu Blueprint</p>
+    <h1>Our Oahu Trip Planner</h1>
+    <p class="sub">Plan it together — check things off, split the to-dos, pick your stays, and keep every idea in one place. Live-synced between you both.</p>
+
+    <div class="hero-grid">
+      <label class="field"><span>Traveler 1</span><input id="nameA" maxlength="14" placeholder="Me" autocomplete="off"></label>
+      <label class="field"><span>Traveler 2</span><input id="nameB" maxlength="14" placeholder="Wife" autocomplete="off"></label>
+      <label class="field"><span>Arrive</span><input type="date" id="startDate"></label>
+      <label class="field"><span>Depart</span><input type="date" id="endDate"></label>
+    </div>
+
+    <div class="hero-status">
+      <div id="countdown" class="countdown">Set your travel dates to start the countdown 🌴</div>
+      <button id="syncPill" class="sync-pill local" title="Sync settings">📴 Local only</button>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn primary" id="shareBtn">🔗 Copy invite link</button>
+      <button class="btn" id="exportBtn">⬇️ Export</button>
+      <button class="btn" id="importBtn">⬆️ Import</button>
+      <button class="btn" id="setupBtn">☁️ Sync setup</button>
+      <button class="btn" id="resetBtn">↺ Reset</button>
+      <input type="file" id="fileInput" accept="application/json" hidden>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="wrap">
+    <button class="tab active" data-tab="itinerary">🗺️ Itinerary</button>
+    <button class="tab" data-tab="stays">🏨 Stays</button>
+    <button class="tab" data-tab="packing">🎒 Packing</button>
+    <button class="tab" data-tab="todo">✅ To-Dos</button>
+    <button class="tab" data-tab="notes">📝 Notes</button>
+    <button class="tab" data-tab="info">🌊 Good to Know</button>
+    <span class="pct" id="pct">0%</span>
+  </div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+</nav>
+
+<main class="wrap">
+  <section class="panel active" id="panel-itinerary">
+    <p class="hint">☑️ Check items off as you plan. <strong>Tap the circle</strong> on any line to assign it — keep tapping to cycle through <strong>you → partner → both → unassigned</strong>. Changes appear on both devices instantly.</p>
+    <div class="stack" id="itinerary"></div>
+  </section>
+
+  <section class="panel" id="panel-stays">
+    <p class="section-title">Curated Boutique Accommodations</p>
+    <p class="section-sub">Pick one per town together. Your choice syncs live.</p>
+    <div id="stays"></div>
+  </section>
+
+  <section class="panel" id="panel-packing">
+    <p class="section-title">Packing List</p>
+    <p class="section-sub">Reef-safe only. Old sneakers required. Slippers bought on arrival.</p>
+    <div id="packing"></div>
+  </section>
+
+  <section class="panel" id="panel-todo">
+    <p class="section-title">Planning To-Dos</p>
+    <p class="section-sub">Split these up — assign each one so nothing gets dropped.</p>
+    <div id="todo"></div>
+  </section>
+
+  <section class="panel" id="panel-notes">
+    <p class="section-title">Shared Notes</p>
+    <p class="section-sub">Ideas, links, reservations, reminders — drop them here for each other.</p>
+    <div class="card note-form" style="margin-bottom:20px">
+      <form class="note-form" data-add="note" id="noteForm">
+        <textarea placeholder="e.g. Book the Ke Iki bungalow for Sept 12–14 — they sell out early…" maxlength="600"></textarea>
+        <div class="row">
+          <select id="noteAuthor"></select>
+          <button class="btn primary" type="submit" style="background:var(--deep);color:#fff;border-color:var(--deep)">Add note</button>
+        </div>
+      </form>
+    </div>
+    <div class="stack" id="notes"></div>
+  </section>
+
+  <section class="panel" id="panel-info">
+    <p class="section-title">Season &amp; Ocean Logic + Local Etiquette</p>
+    <p class="section-sub">The stuff that makes the difference between a good trip and a great one.</p>
+    <div class="info-grid">
+      <div class="card info">
+        <h3>📅 Best Time to Go</h3>
+        <ul>
+          <li><strong>April–May</strong> or <strong>September–October</strong> — perfect 80°F weather, warm swimming water, lower prices, manageable parking.</li>
+          <li>These windows dodge both the winter swells and the summer crowds.</li>
+        </ul>
+      </div>
+      <div class="card info">
+        <h3>🌊 The Winter Swim Warning</h3>
+        <ul>
+          <li>If you travel <strong>November–February</strong>, North Shore waves swell to dangerous <strong>30-foot heights</strong>.</li>
+          <li>It's incredible for watching pro surf competitions from the safety of the sand.</li>
+          <li>Save actual swimming for calm city beaches or protected bays.</li>
+        </ul>
+        <div class="warn">Never turn your back on the ocean — winter shorebreak is stronger than it looks.</div>
+      </div>
+      <div class="card info">
+        <h3>🧴 Protect the Reef</h3>
+        <ul>
+          <li>Hawaii law strictly bans chemical sunscreens.</li>
+          <li>Pack or buy only <strong>mineral-based, reef-safe sunscreen</strong> (zinc oxide or titanium dioxide).</li>
+          <li>Rash guards cut down how much sunscreen you need at all.</li>
+        </ul>
+      </div>
+      <div class="card info">
+        <h3>👟 Trail Gear</h3>
+        <ul>
+          <li>Bring sturdy, older sneakers you don't mind getting stained.</li>
+          <li>The island's rich volcanic mud will ruin bright white shoes instantly.</li>
+          <li>Judd Trail is mud-packed year-round — plan for it.</li>
+        </ul>
+      </div>
+      <div class="card info">
+        <h3>🙏 Respect the Land</h3>
+        <ul>
+          <li>Always stay on marked paths to avoid stepping on sacred historical sites (<em>kapu</em>).</li>
+          <li>Never approach or touch marine wildlife — including honu (green sea turtles).</li>
+          <li>Keep a respectful distance on the sand and in the water.</li>
+        </ul>
+      </div>
+      <div class="card info">
+        <h3>☁️ Live Sync &amp; Security</h3>
+        <ul>
+          <li>Your plan lives in a single Firestore document named by your <strong>trip code</strong>.</li>
+          <li>Both of you sign in anonymously — no passwords, no accounts.</li>
+          <li>Recommended Firestore rules:</li>
+        </ul>
+        <p style="margin-top:10px"><code>allow read, write: if request.auth != null;</code></p>
+        <div class="warn">Your Firebase config is stored only in this browser. Never share your config publicly alongside the trip code.</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>Made for the two of you · Aloha 🌴</footer>
+
+<!-- SETUP MODAL -->
+<div class="modal" id="setupModal" hidden>
+  <div class="modal-box">
+    <h2>☁️ Live Sync Setup</h2>
+    <p>Paste your Firebase config so you and your wife share one live plan. Both of you enter the <strong>same trip code</strong>.</p>
+
+    <label for="cfgInput">Firebase config (from console.firebase.google.com)</label>
+    <textarea id="cfgInput" spellcheck="false" placeholder="const firebaseConfig = {
+  apiKey: &quot;AIza...&quot;,
+  authDomain: &quot;your-project.firebaseapp.com&quot;,
+  projectId: &quot;your-project&quot;,
+  storageBucket: &quot;your-project.appspot.com&quot;,
+  messagingSenderId: &quot;1234567890&quot;,
+  appId: &quot;1:1234567890:web:abc123&quot;
+};"></textarea>
+
+    <label for="tripInput">Trip code (shared secret — you both type the same one)</label>
+    <div class="modal-row">
+      <input type="text" id="tripInput" placeholder="our-oahu-2026" maxlength="60" autocomplete="off">
+      <button type="button" id="genTrip">Random</button>
+    </div>
+
+    <div class="status-msg" id="setupStatus"></div>
+
+    <div class="modal-actions">
+      <button type="button" id="skipSync">Use without sync</button>
+      <button type="button" id="connectBtn" class="primary">Connect &amp; sync</button>
+    </div>
+
+    <p class="tiny">Don't have a Firebase project yet? Create one free at console.firebase.google.com → add a Web app → enable <strong>Firestore</strong> and <strong>Anonymous Auth</strong>. Then paste the config above. Your data stays in your own Firebase project.</p>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+/* =========================================================
+   1. DATA
+   ========================================================= */
+const DAYS = [
+  {id:'d1', n:'Day 1', title:'Modern Urban Culture', place:'Honolulu', items:[
+    {time:'Afternoon', text:'Land at HNL, pick up the rental car, and grab a pair of local rubber slippers at a grocery store'},
+    {time:'Afternoon', text:'Check into your Honolulu hotel — Wayfinder Waikiki or Lotus Honolulu'},
+    {time:'Evening', text:'Explore the massive street murals and independent boutiques in the creative Kakaʻako neighborhood'},
+    {time:'Dinner', text:'Traditional Hawaiian pork Lau Lau and Kālua Pig at the historic Highway Inn Kakaʻako'}
+  ]},
+  {id:'d2', n:'Day 2', title:'Neighborhood Eats & Shaded Valleys', place:'Honolulu', items:[
+    {time:'Breakfast', text:'Incredibly light, airy soufflé pancakes away from the hotel crowds at Aloha Kitchen on Ena Road'},
+    {time:'Mid-morning', text:'Pick up supplies — reef-safe sunscreen, water bottles, snacks for the trail'},
+    {time:'Afternoon', text:'Hike the mud-packed Judd Trail through lush bamboo forest, ending with a crisp dip in a freshwater pool'},
+    {time:'Evening', text:'Unwind at a waterfront happy hour between 3:00 and 6:00 PM — fresh poke and local draft beer'}
+  ]},
+  {id:'d3', n:'Day 3', title:'Windward Drive to Country Seclusion', place:'North Shore', items:[
+    {time:'Morning', text:'Pack up and drive the beautiful, rugged Windward Highway, stopping at roadside fruit stands for fresh coconuts'},
+    {time:'Afternoon', text:'Find the hidden right-of-way trail off the highway and slip into Kawela Bay — a calm crescent shaded by massive banyan trees'},
+    {time:'Evening', text:'Check into your North Shore lodging — Ke Iki Beach Bungalows or Ocean Villas at Turtle Bay'},
+    {time:'Dinner', text:'Wild-caught fish tacos at a country food truck gathering'}
+  ]},
+  {id:'d4', n:'Day 4', title:'Surf Traditions & Small Towns', place:'North Shore', items:[
+    {time:'Sunrise', text:'Acai bowl on the beach while watching local surfers clear the reef breaks'},
+    {time:'Afternoon', text:'Stroll historic Haleiwa Town — plantation-era storefronts, community surf shops, natural shave ice'},
+    {time:'Evening', text:'Watch the sunset from the sand, keeping a respectful distance from any resting honu (green sea turtles)'}
+  ]},
+  {id:'d5', n:'Day 5', title:'Lookouts & Classic Fare', place:'Departure Day', items:[
+    {time:'Morning', text:'Head back toward the airport via the historic Pali Highway'},
+    {time:'Morning', text:'Stop at the windswept Nuʻuanu Pali Lookout for panoramic mountain and ocean views'},
+    {time:'Lunch', text:'Cap off the trip with a massive neighborhood plate lunch — a house-made Loco Moco'},
+    {time:'Departure', text:'Return the rental car and fly home from HNL'}
+  ]}
+];
+
+const STAYS = [
+  {group:'honolulu', label:'Nights 1 & 2 · Honolulu', options:[
+    {id:'wayfinder', name:'Wayfinder Waikiki', area:'Waikiki / Kakaʻako',
+     blurb:'A unique "Tropical Brutalism" design with an excellent on-site poke bar and a vibrant local vibe close to Kakaʻako.',
+     feats:['Walkable to Kakaʻako murals & boutiques','On-site poke bar','Design-forward, local crowd']},
+    {id:'lotus', name:'Lotus Honolulu', area:'Quiet edge of Waikiki near Diamond Head',
+     blurb:'A peaceful sanctuary at the quiet edge of Waikiki near Diamond Head — entirely away from high-density crowds.',
+     feats:['Away from the Waikiki crush','Close to Diamond Head','Calmer, quieter stay']}
+  ]},
+  {group:'northshore', label:'Nights 3 & 4 · North Shore', options:[
+    {id:'keiki', name:'Ke Iki Beach Bungalows', area:'Beachfront, North Shore',
+     blurb:'Puts you directly on the sand with hammocks and barbecues, steps from incredible seasonal snorkeling and local food trucks.',
+     feats:['Directly on the sand','Hammocks & BBQ grills','Steps to food trucks & snorkeling']},
+    {id:'turtle', name:'Ocean Villas at Turtle Bay', area:'Turtle Bay / Kawela Bay',
+     blurb:'Large villa layouts with full kitchens — quiet luxury with fast trail access to Kawela Bay.',
+     feats:['Full kitchens','Spacious villa layouts','Quick trail access to Kawela Bay']}
+  ]}
+];
+
+const PACKING = [
+  {cat:'Reef & Sun', items:[
+    'Mineral reef-safe sunscreen (zinc oxide / titanium dioxide) — chemical sunscreen is banned in Hawaii',
+    'Reef-safe lip balm with SPF',
+    'Rash guard or swim shirt for long water days',
+    'Wide-brim hat & polarized sunglasses'
+  ]},
+  {cat:'Trail & Adventure', items:[
+    'Sturdy old sneakers you can ruin with volcanic mud',
+    'Quick-dry towel','Refillable water bottles (2)','Small daypack','Bug repellent'
+  ]},
+  {cat:'Beach & Ocean', items:[
+    'Reef shoes / water sandals',
+    'Snorkel mask (or plan to rent on the North Shore)',
+    'Dry bag for phone & keys','Beach blanket or pareo'
+  ]},
+  {cat:'Clothing', items:[
+    'Local rubber slippers (buy at Foodland or Times on Day 1)',
+    'Light rain shell for windward showers',
+    'One nicer outfit for a Honolulu dinner',
+    'Layers — North Shore evenings get breezy'
+  ]},
+  {cat:'Docs & Logistics', items:[
+    "Driver's license + credit card for the rental car",
+    'Rental car confirmation & insurance',
+    'Hotel confirmations (Wayfinder / Lotus / Ke Iki / Turtle Bay)',
+    'Flight boarding passes','Travel insurance info'
+  ]}
+];
+
+const TODO = [
+  {phase:'Book Now', items:[
+    'Lock the travel window — April–May or September–October for best weather and prices',
+    'Book flights into and out of HNL',
+    'Book Honolulu hotel for Nights 1 & 2 (Wayfinder Waikiki or Lotus Honolulu)',
+    'Book North Shore lodging for Nights 3 & 4 (Ke Iki Beach Bungalows or Ocean Villas at Turtle Bay)',
+    'Reserve the rental car from HNL'
+  ]},
+  {phase:'Plan Ahead', items:[
+    'Check whether your dates fall in the Nov–Feb big-wave window — plan North Shore as watching-only',
+    'Map the Windward Highway drive and pin the fruit stands',
+    'Find the Kawela Bay public right-of-way access point',
+    'Shortlist Haleiwa Town shops & shave ice spots',
+    'Pick a waterfront happy hour spot for Day 2 (3–6 PM)',
+    'Book any restaurant reservations for the Honolulu nights'
+  ]},
+  {phase:'Before You Fly', items:[
+    'Buy reef-safe mineral sunscreen',
+    'Pack the old sneakers for Judd Trail',
+    'Download offline maps for the North Shore',
+    'Set a sunrise alarm for Day 4 acai bowls'
+  ]}
+];
+
+/* =========================================================
+   2. STATE
+   ========================================================= */
+const KEY_STATE = 'oahu-planner-v1';
+const KEY_CFG   = 'oahu-fb-config';
+const KEY_TRIP  = 'oahu-fb-trip';
+const KEY_SKIP  = 'oahu-skip-sync';
+
+const defaultState = () => ({
+  names:{a:'', b:''},
+  startDate:'', endDate:'',
+  items:{},
+  stays:{honolulu:null, northshore:null},
+  extras:{packing:[], todo:[]},
+  notes:[]
+});
+
+let state = defaultState();
+
+function normalize(s){
+  s = s || {};
+  return {
+    names:{a:(s.names&&s.names.a)||'', b:(s.names&&s.names.b)||''},
+    startDate:s.startDate||'',
+    endDate:s.endDate||'',
+    items:s.items||{},
+    stays:{honolulu:(s.stays&&s.stays.honolulu)||null, northshore:(s.stays&&s.stays.northshore)||null},
+    extras:{packing:(s.extras&&s.extras.packing)||[], todo:(s.extras&&s.extras.todo)||[]},
+    notes:Array.isArray(s.notes)?s.notes:[]
+  };
+}
+
+function getItem(id){ return state.items[id] || {done:false, who:''}; }
+function setItem(id, patch){
+  state.items[id] = Object.assign({done:false, who:''}, getItem(id), patch);
+  save();
+}
+
+/* Stable stringify so we can detect true changes regardless of key order */
+function canon(o){
+  if(o === null || typeof o !== 'object') return JSON.stringify(o);
+  if(Array.isArray(o)) return '[' + o.map(canon).join(',') + ']';
+  return '{' + Object.keys(o).sort().map(k => JSON.stringify(k) + ':' + canon(o[k])).join(',') + '}';
+}
+
+let lastCanon = '';
+
+/* =========================================================
+   3. HELPERS
+   ========================================================= */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const initial = (name, fallback) => {
+  const n = (name||'').trim();
+  return n ? n.charAt(0).toUpperCase() : fallback;
+};
+function whoLabel(who){
+  if(who === 'a') return initial(state.names.a,'A');
+  if(who === 'b') return initial(state.names.b,'B');
+  if(who === 'both') return (initial(state.names.a,'A') + initial(state.names.b,'B')).slice(0,2);
+  return '?';
+}
+function whoTitle(who){
+  if(who === 'a') return (state.names.a || 'Traveler 1') + ' — tap to change';
+  if(who === 'b') return (state.names.b || 'Traveler 2') + ' — tap to change';
+  if(who === 'both') return 'Both of you — tap to change';
+  return 'Unassigned — tap to assign';
+}
+
+let toastTimer;
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+function b64encode(str){
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function b64decode(str){
+  str = str.replace(/-/g,'+').replace(/_/g,'/');
+  const bin = atob(str);
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+/* =========================================================
+   4. RENDER
+   ========================================================= */
+function itemHTML(id, time, text){
+  const s = getItem(id);
+  return `<li class="item ${s.done ? 'done' : ''}">
+    <input type="checkbox" data-id="${id}" ${s.done ? 'checked' : ''} aria-label="Mark complete">
+    <div class="item-body">
+      <span class="chip">${esc(time)}</span>
+      <p>${esc(text)}</p>
+    </div>
+    <button class="who ${s.who || ''}" data-act="who" data-id="${id}" title="${esc(whoTitle(s.who))}">${esc(whoLabel(s.who))}</button>
+  </li>`;
+}
+
+function renderItinerary(){
+  document.getElementById('itinerary').innerHTML = DAYS.map(day => `
+    <article class="card">
+      <div class="day-head">
+        <span class="day-badge">${day.n}</span>
+        <div>
+          <h2 class="day-title">${esc(day.title)}</h2>
+          <span class="day-place">${esc(day.place)}</span>
+        </div>
+      </div>
+      <ul class="items">
+        ${day.items.map((it,i) => itemHTML(`${day.id}-${i}`, it.time, it.text)).join('')}
+      </ul>
+    </article>
+  `).join('');
+}
+
+function renderStays(){
+  document.getElementById('stays').innerHTML = STAYS.map(group => `
+    <p class="section-title" style="margin-top:6px">${esc(group.label)}</p>
+    <div class="stays">
+      ${group.options.map(o => {
+        const selected = state.stays[group.group] === o.id;
+        const booked = getItem('stay-' + o.id).done;
+        return `<article class="card stay ${selected ? 'selected' : ''}">
+          <span class="area">${esc(o.area)}</span>
+          <h3>${esc(o.name)}</h3>
+          <p>${esc(o.blurb)}</p>
+          <ul>${o.feats.map(f => `<li>${esc(f)}</li>`).join('')}</ul>
+          <div class="stay-actions">
+            <button class="pick" data-act="pick" data-group="${group.group}" data-id="${o.id}">
+              ${selected ? '✓ Our pick' : 'Choose this'}
+            </button>
+            <label class="booked">
+              <input type="checkbox" data-id="stay-${o.id}" ${booked ? 'checked' : ''}> Booked
+            </label>
+          </div>
+        </article>`;
+      }).join('')}
+    </div>
+  `).join('');
+}
+
+function checkRow(id, text, kind){
+  const s = getItem(id);
+  return `<li class="item ${s.done ? 'done' : ''}">
+    <input type="checkbox" data-id="${id}" ${s.done ? 'checked' : ''} aria-label="Mark complete">
+    <div class="item-body"><p>${esc(text)}</p></div>
+    <button class="who ${s.who || ''}" data-act="who" data-id="${id}" title="${esc(whoTitle(s.who))}">${esc(whoLabel(s.who))}</button>
+    ${kind ? `<button class="mini" data-del="${kind}" data-id="${id}" title="Remove">×</button>` : ''}
+  </li>`;
+}
+
+function renderPacking(){
+  let html = PACKING.map((g,gi) => `
+    <div class="card group">
+      <p class="group-head">${esc(g.cat)}</p>
+      <ul class="items">${g.items.map((t,i) => checkRow(`pack-${gi}-${i}`, t, null)).join('')}</ul>
+    </div>
+  `).join('');
+
+  if(state.extras.packing.length){
+    html += `<div class="card group">
+      <p class="group-head">Our Additions</p>
+      <ul class="items">${state.extras.packing.map(x => checkRow(x.id, x.text, 'packing')).join('')}</ul>
+    </div>`;
+  }
+  html += `<form class="add-row" data-add="packing">
+    <input type="text" placeholder="Add your own item…" maxlength="90">
+    <button type="submit">Add</button>
+  </form>`;
+  document.getElementById('packing').innerHTML = html;
+}
+
+function renderTodo(){
+  let html = TODO.map((g,gi) => `
+    <div class="card group">
+      <p class="group-head">${esc(g.phase)}</p>
+      <ul class="items">${g.items.map((t,i) => checkRow(`todo-${gi}-${i}`, t, null)).join('')}</ul>
+    </div>
+  `).join('');
+
+  if(state.extras.todo.length){
+    html += `<div class="card group">
+      <p class="group-head">Our Additions</p>
+      <ul class="items">${state.extras.todo.map(x => checkRow(x.id, x.text, 'todo')).join('')}</ul>
+    </div>`;
+  }
+  html += `<form class="add-row" data-add="todo">
+    <input type="text" placeholder="Add a to-do…" maxlength="90">
+    <button type="submit">Add</button>
+  </form>`;
+  document.getElementById('todo').innerHTML = html;
+}
+
+function renderNotes(){
+  const el = document.getElementById('notes');
+  if(!state.notes.length){
+    el.innerHTML = `<p style="color:var(--muted);font-size:14px;text-align:center;padding:18px">No notes yet — add the first one above. 🌴</p>`;
+    return;
+  }
+  el.innerHTML = state.notes.map(n => {
+    const isA = n.author === 'a';
+    const name = (isA ? state.names.a : state.names.b) || (isA ? 'Traveler 1' : 'Traveler 2');
+    const when = new Date(n.ts).toLocaleDateString(undefined,{month:'short',day:'numeric'}) + ' · ' +
+                 new Date(n.ts).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+    return `<div class="note">
+      <div class="note-head">
+        <span class="avatar ${isA ? 'a' : 'b'}">${esc(initial(name,'?'))}</span>
+        <b>${esc(name)}</b>
+        <time>${esc(when)}</time>
+        <button class="mini" data-del="note" data-id="${n.id}" title="Delete note">×</button>
+      </div>
+      <p>${esc(n.text)}</p>
+    </div>`;
+  }).join('');
+}
+
+function syncNoteAuthors(){
+  const sel = document.getElementById('noteAuthor');
+  const cur = sel.value;
+  sel.innerHTML = `<option value="a">${esc(state.names.a || 'Traveler 1')}</option>
+                   <option value="b">${esc(state.names.b || 'Traveler 2')}</option>`;
+  sel.value = (cur === 'a' || cur === 'b') ? cur : 'a';
+}
+
+function allIds(){
+  const ids = [];
+  DAYS.forEach(d => d.items.forEach((_,i) => ids.push(`${d.id}-${i}`)));
+  PACKING.forEach((g,gi) => g.items.forEach((_,i) => ids.push(`pack-${gi}-${i}`)));
+  TODO.forEach((g,gi) => g.items.forEach((_,i) => ids.push(`todo-${gi}-${i}`)));
+  state.extras.packing.forEach(x => ids.push(x.id));
+  state.extras.todo.forEach(x => ids.push(x.id));
+  return ids;
+}
+
+function updateProgress(){
+  const ids = allIds();
+  const done = ids.filter(id => getItem(id).done).length;
+  const pct = ids.length ? Math.round((done / ids.length) * 100) : 0;
+  document.getElementById('bar').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+}
+
+const WHO_ORDER = ['', 'a', 'b', 'both'];
+function updateWhoButton(btn, who){
+  btn.className = 'who' + (who ? ' ' + who : '');
+  btn.textContent = whoLabel(who);
+  btn.title = whoTitle(who);
+}
+function refreshWhoLabels(){
+  document.querySelectorAll('.who').forEach(btn => {
+    updateWhoButton(btn, getItem(btn.dataset.id).who || '');
+  });
+  syncNoteAuthors();
+}
+
+function renderCountdown(){
+  const el = document.getElementById('countdown');
+  const s = state.startDate, e = state.endDate;
+  if(!s){ el.textContent = 'Set your travel dates to start the countdown 🌴'; return; }
+  const start = new Date(s + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = Math.round((start - today) / 86400000);
+  let txt;
+  if(days > 1) txt = `${days} days until wheels up 🌺`;
+  else if(days === 1) txt = 'Tomorrow — aloha time! 🌺';
+  else if(days === 0) txt = 'Today! E komo mai 🌺';
+  else txt = 'Trip underway — enjoy every minute 🌴';
+  if(e){
+    const end = new Date(e + 'T00:00:00');
+    const nights = Math.round((end - start) / 86400000);
+    if(nights > 0) txt += ` · ${nights} night${nights > 1 ? 's' : ''}`;
+  }
+  el.textContent = txt;
+}
+
+function hydrateInputs(){
+  document.getElementById('nameA').value = state.names.a;
+  document.getElementById('nameB').value = state.names.b;
+  document.getElementById('startDate').value = state.startDate;
+  document.getElementById('endDate').value = state.endDate;
+}
+
+function renderAll(){
+  renderItinerary();
+  renderStays();
+  renderPacking();
+  renderTodo();
+  renderNotes();
+  refreshWhoLabels();
+  updateProgress();
+  renderCountdown();
+}
+
+/* =========================================================
+   5. APPLY STATE (guarded against clobbering active typing)
+   ========================================================= */
+let pendingRemote = null;
+
+function isTextEditing(){
+  const ae = document.activeElement;
+  if(!ae || !ae.matches) return false;
+  return ae.matches('input[type=text], input[type=date], textarea, select');
+}
+
+function applyState(next){
+  const c = canon(next);
+  if(c === lastCanon) return;
+  lastCanon = c;
+  state = next;
+  renderAll();
+  hydrateInputs();
+}
+
+document.addEventListener('focusout', (e) => {
+  if(!pendingRemote) return;
+  if(!e.target.matches || !e.target.matches('input, textarea, select')) return;
+  setTimeout(() => {
+    if(isTextEditing()) return;
+    const r = pendingRemote;
+    pendingRemote = null;
+    applyState(r);
+  }, 60);
+});
+
+/* =========================================================
+   6. SYNC STATUS
+   ========================================================= */
+function setSyncStatus(kind, label){
+  const pill = document.getElementById('syncPill');
+  const map = {
+    live:   {cls:'sync-pill live',   txt:'🟢 Live sync'},
+    saving: {cls:'sync-pill saving', txt:'🟡 Saving…'},
+    local:  {cls:'sync-pill local',  txt:'📴 Local only'},
+    error:  {cls:'sync-pill error',  txt:'🔴 Sync error'}
+  };
+  const m = map[kind] || map.local;
+  pill.className = m.cls;
+  pill.textContent = label || m.txt;
+}
+
+/* =========================================================
+   7. FIREBASE SYNC MODULE
+   ========================================================= */
+const FB = {
+  ready:false,
+  ref:null,
+  setDoc:null,
+  getDoc:null,
+  onSnapshot:null,
+  seeded:false
+};
+
+let saveTimer = null;
+
+/* ---- save: local cache + debounced Firestore write ---- */
+function save(){
+  lastCanon = canon(state);
+  try{ localStorage.setItem(KEY_STATE, JSON.stringify(state)); }catch(e){}
+
+  if(!FB.ready){ setSyncStatus('local'); return; }
+
+  setSyncStatus('saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try{
+      await FB.setDoc(FB.ref, state);
+      setSyncStatus('live');
+    }catch(err){
+      console.error('[firestore write]', err);
+      setSyncStatus('error');
+      toast('Could not save to cloud — check your rules');
+    }
+  }, 400);
+}
+
+/* ---- parse the pasted firebaseConfig ---- */
+function parseConfig(text){
+  let t = (text || '').trim();
+  if(!t) throw new Error('Config is empty');
+  t = t.replace(/^(const|var|let)\s+\w+\s*=\s*/, '');
+  t = t.replace(/;+\s*$/, '');
+  const start = t.indexOf('{');
+  const end = t.lastIndexOf('}');
+  if(start === -1 || end === -1) throw new Error('Could not find a config object');
+  t = t.slice(start, end + 1);
+  const cfg = Function('"use strict";return (' + t + ')')();
+  if(!cfg || !cfg.apiKey || !cfg.projectId) throw new Error('Config is missing apiKey or projectId');
+  return cfg;
+}
+
+/* ---- connect to Firebase ---- */
+async function connectFirebase(config, tripCode){
+  const appMod  = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+  const fsMod   = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+  const authMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+
+  const app  = appMod.initializeApp(config);
+  const db   = fsMod.getFirestore(app);
+  const auth = authMod.getAuth(app);
+
+  await authMod.signInAnonymously(auth);
+
+  FB.ref        = fsMod.doc(db, 'trips', tripCode);
+  FB.setDoc     = fsMod.setDoc;
+  FB.getDoc     = fsMod.getDoc;
+  FB.onSnapshot = fsMod.onSnapshot;
+
+  /* Seed the doc on first ever connect, otherwise adopt what's there */
+  const snap = await FB.getDoc(FB.ref);
+  if(!snap.exists()){
+    await FB.setDoc(FB.ref, state);
+    FB.seeded = true;
+  }else{
+    const remote = normalize(snap.data());
+    lastCanon = canon(remote);
+    state = remote;
+    renderAll();
+    hydrateInputs();
+  }
+
+  FB.ready = true;
+  setSyncStatus('live');
+
+  /* Real-time listener */
+  FB.onSnapshot(FB.ref, { includeMetadataChanges:true }, (s) => {
+    if(!s.exists()) return;
+    if(s.metadata.hasPendingWrites){
+      // our own write still in flight — ignore the echo
+      return;
+    }
+    const remote = normalize(s.data());
+    if(canon(remote) === lastCanon) return;   // nothing actually changed
+
+    if(isTextEditing()){
+      pendingRemote = remote;                 // defer until they stop typing
+      return;
+    }
+    applyState(remote);
+    setSyncStatus('live');
+  }, (err) => {
+    console.error('[firestore listen]', err);
+    setSyncStatus('error');
+  });
+}
+
+/* =========================================================
+   8. SETUP MODAL
+   ========================================================= */
+const modal       = document.getElementById('setupModal');
+const cfgInput    = document.getElementById('cfgInput');
+const tripInput   = document.getElementById('tripInput');
+const setupStatus = document.getElementById('setupStatus');
+const connectBtn  = document.getElementById('connectBtn');
+
+function openModal(){ modal.hidden = false; }
+function closeModal(){ modal.hidden = true; }
+
+function setSetupStatus(msg, kind){
+  setupStatus.textContent = msg || '';
+  setupStatus.className = 'status-msg' + (kind ? ' ' + kind : '');
+}
+
+function randomTripCode(){
+  const words = ['oahu','northshore','honolulu','kawela','haleiwa','palmtree','banyan','mahalo','honu','aloha'];
+  const w = words[Math.floor(Math.random() * words.length)];
+  const n = Math.floor(1000 + Math.random() * 9000);
+  return `${w}-${n}`;
+}
+
+document.getElementById('genTrip').addEventListener('click', () => {
+  tripInput.value = randomTripCode();
+  setSetupStatus('Trip code generated — send it to your partner.', 'ok');
+});
+
+document.getElementById('skipSync').addEventListener('click', () => {
+  localStorage.setItem(KEY_SKIP, '1');
+  closeModal();
+  setSyncStatus('local');
+  toast('Planning locally on this device');
+});
+
+document.getElementById('setupBtn').addEventListener('click', () => {
+  cfgInput.value = localStorage.getItem(KEY_CFG) || '';
+  tripInput.value = localStorage.getItem(KEY_TRIP) || '';
+  setSetupStatus('');
+  openModal();
+});
+
+document.getElementById('syncPill').addEventListener('click', () => {
+  document.getElementById('setupBtn').click();
+});
+
+connectBtn.addEventListener('click', async () => {
+  let cfg;
+  try{
+    cfg = parseConfig(cfgInput.value);
+  }catch(err){
+    setSetupStatus('⚠️ ' + err.message, 'err');
+    return;
+  }
+  const trip = tripInput.value.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+  if(!trip){
+    setSetupStatus('⚠️ Enter a trip code (any shared word or phrase).', 'err');
+    return;
+  }
+
+  connectBtn.disabled = true;
+  setSetupStatus('Connecting…');
+
+  try{
+    await connectFirebase(cfg, trip);
+    localStorage.setItem(KEY_CFG, cfgInput.value.trim());
+    localStorage.setItem(KEY_TRIP, trip);
+    localStorage.removeItem(KEY_SKIP);
+    setSetupStatus('✅ Connected! Your plan is live.', 'ok');
+    toast('Live sync on ☁️');
+    setTimeout(closeModal, 700);
+  }catch(err){
+    console.error(err);
+    setSetupStatus('⚠️ ' + (err.message || 'Could not connect. Check your config & Firestore rules.'), 'err');
+  }finally{
+    connectBtn.disabled = false;
+  }
+});
+
+/* =========================================================
+   9. EVENTS
+   ========================================================= */
+document.addEventListener('change', e => {
+  const cb = e.target.closest('input[type=checkbox][data-id]');
+  if(!cb) return;
+  const id = cb.dataset.id;
+  setItem(id, {done: cb.checked});
+  const li = cb.closest('.item');
+  if(li) li.classList.toggle('done', cb.checked);
+  updateProgress();
+});
+
+document.addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if(tab){
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+    document.querySelectorAll('.panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'panel-' + tab.dataset.tab);
+    });
+    return;
+  }
+
+  const whoBtn = e.target.closest('[data-act="who"]');
+  if(whoBtn){
+    const id = whoBtn.dataset.id;
+    const cur = getItem(id).who || '';
+    const next = WHO_ORDER[(WHO_ORDER.indexOf(cur) + 1) % WHO_ORDER.length];
+    setItem(id, {who: next});
+    updateWhoButton(whoBtn, next);
+    return;
+  }
+
+  const pick = e.target.closest('[data-act="pick"]');
+  if(pick){
+    const {group, id} = pick.dataset;
+    state.stays[group] = (state.stays[group] === id) ? null : id;
+    save();
+    renderStays();
+    toast(state.stays[group] ? 'Stay picked 🏨' : 'Stay un-picked');
+    return;
+  }
+
+  const del = e.target.closest('[data-del]');
+  if(del){
+    const {del: kind, id} = del.dataset;
+    if(kind === 'note'){
+      state.notes = state.notes.filter(n => n.id !== id);
+      save(); renderNotes(); toast('Note deleted');
+    } else {
+      state.extras[kind] = state.extras[kind].filter(x => x.id !== id);
+      save();
+      kind === 'packing' ? renderPacking() : renderTodo();
+      updateProgress();
+      toast('Removed');
+    }
+    return;
+  }
+});
+
+document.addEventListener('submit', e => {
+  const form = e.target.closest('[data-add]');
+  if(!form) return;
+  e.preventDefault();
+  const kind = form.dataset.add;
+
+  if(kind === 'note'){
+    const ta = form.querySelector('textarea');
+    const text = ta.value.trim();
+    if(!text) return;
+    state.notes.unshift({
+      id: 'n-' + Date.now(),
+      author: form.querySelector('select').value,
+      text,
+      ts: Date.now()
+    });
+    ta.value = '';
+    save(); renderNotes(); toast('Note added 📝');
+    return;
+  }
+
+  const input = form.querySelector('input[type=text]');
+  const text = input.value.trim();
+  if(!text) return;
+  state.extras[kind].push({id: kind + '-x-' + Date.now(), text});
+  input.value = '';
+  save();
+  kind === 'packing' ? renderPacking() : renderTodo();
+  updateProgress();
+  toast('Added ✓');
+});
+
+document.getElementById('nameA').addEventListener('input', e => {
+  state.names.a = e.target.value; save(); refreshWhoLabels(); renderNotes();
+});
+document.getElementById('nameB').addEventListener('input', e => {
+  state.names.b = e.target.value; save(); refreshWhoLabels(); renderNotes();
+});
+document.getElementById('startDate').addEventListener('change', e => {
+  state.startDate = e.target.value; save(); renderCountdown();
+});
+document.getElementById('endDate').addEventListener('change', e => {
+  state.endDate = e.target.value; save(); renderCountdown();
+});
+
+/* ---- invite link: carries config + trip code so partner auto-connects ---- */
+document.getElementById('shareBtn').addEventListener('click', async () => {
+  const cfgRaw = localStorage.getItem(KEY_CFG);
+  const trip   = localStorage.getItem(KEY_TRIP);
+
+  let url;
+  if(FB.ready && cfgRaw && trip){
+    const payload = b64encode(JSON.stringify({c: cfgRaw, t: trip}));
+    url = location.href.split('#')[0] + '#f=' + payload;
+  }else{
+    const payload = b64encode(JSON.stringify(state));
+    url = location.href.split('#')[0] + '#p=' + payload;
+  }
+
+  try{
+    await navigator.clipboard.writeText(url);
+    toast(FB.ready ? 'Invite link copied — send it to your wife 💌' : 'Snapshot link copied');
+  }catch(err){
+    prompt('Copy this link and share it:', url);
+  }
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'oahu-trip-plan.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Plan exported ⬇️');
+});
+
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('fileInput').click();
+});
+
+document.getElementById('fileInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const next = normalize(JSON.parse(reader.result));
+      state = next;
+      save(); hydrateInputs(); renderAll();
+      toast('Plan imported — welcome back 🌴');
+    }catch(err){ toast('Could not read that file'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if(!confirm('Reset everything? This clears all checkmarks, assignments, notes and picks — and syncs the reset to your partner.')) return;
+  state = defaultState();
+  save();
+  hydrateInputs();
+  renderAll();
+  toast('Fresh start 🌺');
+});
+
+/* =========================================================
+   10. INIT
+   ========================================================= */
+async function init(){
+  /* local cache first — instant paint */
+  try{
+    const raw = localStorage.getItem(KEY_STATE);
+    if(raw) state = normalize(JSON.parse(raw));
+  }catch(e){}
+  lastCanon = canon(state);
+
+  hydrateInputs();
+  syncNoteAuthors();
+  renderAll();
+
+  /* invite link — auto-connect partner */
+  const fm = location.hash.match(/f=([^&]+)/);
+  if(fm){
+    try{
+      const payload = JSON.parse(b64decode(fm[1]));
+      history.replaceState(null, '', location.pathname + location.search);
+      if(payload.c && payload.t){
+        localStorage.setItem(KEY_CFG, payload.c);
+        localStorage.setItem(KEY_TRIP, payload.t);
+        localStorage.removeItem(KEY_SKIP);
+        cfgInput.value = payload.c;
+        tripInput.value = payload.t;
+        setSyncStatus('saving', '🟡 Connecting…');
+        await connectFirebase(parseConfig(payload.c), payload.t);
+        toast('Connected — you\'re planning together 🌺');
+        return;
+      }
+    }catch(err){
+      console.error(err);
+      toast('That invite link could not be read');
+    }
+  }
+
+  /* snapshot link (local-only mode) */
+  const pm = location.hash.match(/p=([^&]+)/);
+  if(pm){
+    try{
+      state = normalize(JSON.parse(b64decode(pm[1])));
+      lastCanon = canon(state);
+      save(); hydrateInputs(); renderAll();
+      toast('Shared snapshot loaded 🌴');
+    }catch(e){ toast('Could not read that shared link'); }
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+
+  /* auto-reconnect if previously configured */
+  const cfgRaw = localStorage.getItem(KEY_CFG);
+  const trip   = localStorage.getItem(KEY_TRIP);
+  const skipped = localStorage.getItem(KEY_SKIP);
+
+  if(cfgRaw && trip && !skipped){
+    setSyncStatus('saving', '🟡 Reconnecting…');
+    try{
+      await connectFirebase(parseConfig(cfgRaw), trip);
+    }catch(err){
+      console.error(err);
+      setSyncStatus('error');
+      toast('Could not reconnect — tap the sync pill to fix');
+    }
+  }else if(!skipped){
+    setSyncStatus('local');
+    /* first-ever visit → invite setup, but let them dismiss */
+    if(!localStorage.getItem(KEY_STATE)){
+      setTimeout(openModal, 500);
+    }
+  }
+}
+
+init();
+</script>
+</body>
+</html>
